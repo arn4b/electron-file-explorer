@@ -1,9 +1,8 @@
-import { stat } from 'original-fs'
-import { useState, useMemo} from 'react'
-import { FilesViewer} from './FileViewer'
+import { useState, useMemo } from 'react'
+import { FilesViewer } from './FilesViewer'
 
 const fs = window.require('fs')
-const pathModule = window.require(path)
+const pathModule = window.require('path')
 
 const { app } = window.require('@electron/remote')
 
@@ -17,7 +16,6 @@ const formatSize = size => {
 }
 
 function App() {
-
   const [path, setPath] = useState(app.getAppPath())
 
   const files = useMemo(
@@ -41,10 +39,26 @@ function App() {
     [path]
   )
 
+  const onBack = () => setPath(pathModule.dirname(path))
+  const onOpen = folder => setPath(pathModule.join(path, folder))
+
+  const [searchString, setSearchString] = useState('')
+  const filteredFiles = files.filter(s => s.name.startsWith(searchString))
+
   return (
-    <div className="App">
+    <div className="container mt-2">
+      <h4>{path}</h4>
+      <div className="form-group mt-4 mb-2">
+        <input
+          value={searchString}
+          onChange={event => setSearchString(event.target.value)}
+          className="form-control form-control-sm"
+          placeholder="File search"
+        />
+      </div>
+      <FilesViewer files={filteredFiles} onBack={onBack} onOpen={onOpen} />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
